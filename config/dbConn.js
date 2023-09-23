@@ -6,7 +6,7 @@ const connectDB = async () => {
       user: process.env.DB_USER,
       pass: process.env.DB_PWD,
       dbName: process.env.DB_NAME,
-      socketTimeoutMS: 5000,
+      socketTimeoutMS: 4000,
     });
   } catch (error) {
     console.log(error);
