@@ -123,11 +123,21 @@ const insertManyNotes = async (req, res) => {
         .lean()
         .exec();
       console.log("user", user);
-      const noteObj = {
-        user: user._id,
-        title: note.title,
-        text: note.text,
-      };
+      let noteObj;
+      if ("completed" in note) {
+        noteObj = {
+          user: user._id,
+          title: note.title,
+          text: note.text,
+          completed: note.completed,
+        };
+      } else {
+        noteObj = {
+          user: user._id,
+          title: note.title,
+          text: note.text,
+        };
+      }
 
       // validate newNote and push error of each note to errmsgList
       const errmsg = await validateNewNote(noteObj);
