@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const User = require("../models/User");
 const Note = require("../models/Note");
+const validateNewNote = require("../utils/validateNewNote");
 
 // desc get all notes
 // route GET /notes
@@ -28,25 +29,12 @@ const getAllNotes = async (req, res) => {
 const createNote = async (req, res) => {
   const { user: userId, title, text } = req.body;
 
-  //   Confirm data
-  if (!userId || !title || !text) {
-    return res.status(400).json({ message: "All field are required" });
-  }
+  const errmsg = await validateNewNote(eq.body);
 
-  //   Check for duplicate
-  const duplicate = await Note.findOne({ title }).lean().exec();
-  if (duplicate) {
-    return res.status(409).json({ message: "Duplicate Title" });
+  if (errmsg) {
+    const { status, message } = errmsg;
+    return res.status(status).json(message);
   }
-
-  //Check have user that note will be assigned
-  const user = await User.findById(userId).lean().exec();
-  if (!user) {
-    return res
-      .status(400)
-      .json({ message: `Don't have user with id ${userId} ` });
-  }
-
   const noteObj = { user: userId, title, text };
   console.log(noteObj);
 
@@ -121,9 +109,58 @@ const deleteNote = async (req, res) => {
   res.json(reply);
 };
 
+// @desc insert many note
+// @route POST /notes/upload
+// @access Private
+const insertManyNotes = async (req, res) => {
+  const notes = req.body;
+  let errmsgList = [];
+
+  const notesWithUserId = await Promise.all(
+    notes.map(async (note, i) => {
+      // Change field value of field 'user' from 'username' to 'userId'
+      const user = await User.findOne({ username: note.username })
+        .lean()
+        .exec();
+      console.log("user", user);
+      const noteObj = {
+        user: user._id,
+        title: note.title,
+        text: note.text,
+      };
+
+      // validate newNote and push error of each note to errmsgList
+      const errmsg = await validateNewNote(noteObj);
+      if (errmsg) {
+        errmsgList.push({
+          noteErrorIndex: i,
+          ...errmsg,
+        });
+      }
+      return noteObj;
+    })
+  );
+  console.log("notesWithUserId", notesWithUserId);
+  console.log("errmsgList", errmsgList);
+
+  if (errmsgList.length) {
+    console.log("errmsgList", errmsgList);
+    return res.status(400).json({
+      message: `Have ${errmsgList.length} error, revise you sheet `,
+      detail: errmsgList,
+    });
+  }
+
+  const result = await Note.insertMany(notesWithUserId);
+  console.log("result", result);
+
+  res.json({ message: ` updated` });
+};
+
 module.exports = {
   getAllNotes,
   createNote,
   updateNote,
   deleteNote,
+  insertManyNotes,
 };

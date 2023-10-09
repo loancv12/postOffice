@@ -5,6 +5,8 @@ const notesController = require("../controllers/notesController");
 const verifyJWT = require("../middleware/verifyJWT");
 
 router.use(verifyJWT);
+router.route("/upload").post(notesController.insertManyNotes);
+
 router
   .route("/")
   .get(notesController.getAllNotes)
