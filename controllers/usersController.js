@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
 const User = require("../models/User");
-const Note = require("../models/Note");
+const Note = require("../models/Order");
 
 // @desc Get all users
 // @route GET /users

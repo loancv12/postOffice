@@ -1,7 +1,6 @@
 const allowedOrigins = [
-  "http://localhost:3000",
-  "https://notebase-k9gl.onrender.com",
-  "https://notebaseapi.onrender.com",
+  "http://localhost:5173",
+  // TODO
 ];
 
 module.exports = allowedOrigins;

@@ -1,6 +1,8 @@
 require("express-async-errors");
 require("dotenv").config();
 const express = require("express");
+const helmet = require("helmet");
+
 const app = express();
 const path = require("path");
 const cookieParser = require("cookie-parser");
@@ -15,6 +17,10 @@ const PORT = process.env.PORT || 3500;
 
 console.log(process.env.NODE_ENV);
 
+// Security
+app.use(helmet());
+app.disable("x-powered-by");
+
 connectDB();
 app.use(logger);
 
@@ -28,7 +34,11 @@ app.use("/", express.static(path.join(__dirname, "public")));
 app.use("/", require("./routes/root"));
 app.use("/auth", require("./routes/authRoutes"));
 app.use("/users", require("./routes/userRoutes"));
-app.use("/notes", require("./routes/noteRoutes"));
+app.use("/orders", require("./routes/orderRoutes"));
+app.use("/gathers", require("./routes/gatherRoutes"));
+app.use("/transacts", require("./routes/transactRoutes"));
+app.use("/customers", require("./routes/customerRoutes"));
+app.use("/parcels", require("./routes/parcelRoutes"));
 
 app.get("*", function (req, res) {
   res.sendFile(path.resolve(__dirname, "./build/index.html"));
